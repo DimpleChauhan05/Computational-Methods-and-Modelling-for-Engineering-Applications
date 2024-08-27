@@ -1,0 +1,94 @@
+MATLAB code: 
+
+a=arduino('COM3','Uno','Libraries',{'Ultrasonic','ExampleLCD/LCDAddon'},'ForceBuildOn',true); % call the libraries from the MATLAB 
+u = ultrasonic(a,'D9','D10','OutputFormat','double'); % Set up the Ultrasonic Sensor in the format of “Double” [4] 
+lcd = addon(a,'ExampleLCD/LCDAddon','RegisterSelectPin','D7','EnablePin','D6','DataPins',{'D5','D4','D3','D2'}); % Adds the MATLAB support package for Arduino 
+initializeLCD(lcd);
+printLCD(lcd,'Welcome'); % Displaying the necessary value on an LCD
+pause(2); 
+clearLCD(lcd);
+printLCD(lcd,'GROUP_12');
+pause(2); 
+clearLCD(lcd);
+printLCD(lcd,'NEEL PATEL'); 
+pause(2); 
+clearLCD(lcd);
+printLCD(lcd,'110081832');
+pause(2);
+clearLCD(lcd);
+printLCD(lcd,'MEET PATEL'); 
+pause(2); 
+clearLCD(lcd);
+printLCD(lcd,'110077623');
+pause(2); 
+clearLCD(lcd);
+printLCD(lcd,'NITTANT PATEL'); 
+pause(2); 
+clearLCD(lcd);
+printLCD(lcd,'110081202');
+pause(2); 
+clearLCD(lcd);
+I_B=0; % Increase button 
+D_B=0; % Decrease button 
+C_B=0; % Cancel button 
+Crui_B=0; % Cruise control button 
+ACC_B=0; % Adaptive cruise control button 
+count=0;
+spd=0; % spd represents speed 
+while true % Loop which executes for Infinite Time 
+% To read voltade from analog inputs A1-A5 
+I_B = readVoltage(a,'A5');
+D_B = readVoltage(a,'A4');
+C_B = readVoltage(a,'A3');
+Crui_B = readVoltage(a,'A2');
+ACC_B = readVoltage(a,'A1');
+dis = readDistance(u); % dis represents Distance 
+if count==0 %Circuit turn on when power on 
+% Speed increase
+if I_B>=1.5
+spd=spd;
+elseif D_B>=1.5 
+spd=spd-2; % When decrease button is pressed then speed decrement is 3 km/hr 
+else 
+spd=spd-1; % When no button is pressed then speed decreases by 1 
+end 
+elseif count==1 % When button for cruse control press the speed of vehicle remains constant 
+spd;
+elseif count==2 % After determining distance, the adaptive cruise control activates when it is pressed 
+if dis<0.5 % Minimum distance between two objects 
+spd=spd-1;
+else 
+spd=spd+1;
+end 
+if spd>speedlimit
+spd=speedlimit;
+end 
+end 
+% Different modes 
+if Crui_B>=1.5 
+count=1;
+elseif ACC_B>=1.5 
+count=2;
+speedlimit=spd;
+elseif C_B>=1.5 
+count=0;
+elseif I_B>=1.5 && count~=2 
+spd=spd+1;
+elseif D_B>=1.5 && count~=2
+spd=spd-1;
+end 
+if spd<0 
+spd=0;
+end 
+printLCD(lcd,'Speed: '); % Displaying the necessary value on an LCD 
+printLCD(lcd,[strcat(num2str(spd))]); 
+pause(1) 
+end
+
+
+
+
+
+
+
+
